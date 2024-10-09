@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +52,7 @@ public class ClassesService {
                 .teacherId(classRegisterDTO.getTeacher_id())
                 .build();
 
+        // TODO Adicionar o professor na tabela de agrupamento tambem
         classRepository.save(newClass);
         return newClass;
     }
@@ -81,7 +83,7 @@ public class ClassesService {
         if(classFound.isEmpty()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Codigo de classe inexistente.");
         }
-        if (!userRepository.existsUserId(userId)) {
+        if (!userRepository.existsByUserId(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID inexistente.");
         }
 
@@ -94,7 +96,31 @@ public class ClassesService {
     }
 
     public List<ClassesInfoDTO> getClassesFromUser(Long userId) {
+        List<ClassesInfoDTO> listClassesInfo = new ArrayList<>();
 
-        return null;
+        List<AgrupamentoUserClass> listAgrupamento = agrupamentoRepository.findByUserId(userId);
+
+        listAgrupamento.forEach(agrupamento -> {
+            Optional<Class> optionalClassFromUser = classRepository.findById(agrupamento.getClassId());
+            Class classFromUser;
+            if(optionalClassFromUser.isPresent()){
+                classFromUser = optionalClassFromUser.get();
+                ClassesInfoDTO classInfo = ClassesInfoDTO.builder()
+                        .classId(classFromUser.getClassId())
+                        .className(classFromUser.getClassName())
+                        .announcement(classFromUser.getAnnouncement())
+                        .classCode(classFromUser.getClassCode())
+                        .teacher_id(classFromUser.getTeacherId())
+                        .teacherName(userRepository.getTeacherName(classFromUser.getTeacherId()))
+                        .build();
+                
+                listClassesInfo.add(classInfo);
+            } else{
+                log.info("Class de agrupamento nao existe. Class Id: {}", agrupamento.getClassId());
+                agrupamentoRepository.deleteById(agrupamento.getUserClassId());
+            }
+        });
+
+        return listClassesInfo;
     }
 }

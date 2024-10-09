@@ -1,15 +1,15 @@
 package com.faitoncodes.core_processor_service.dao;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Entity(name = "agrupamento_user_class")
-@Table(name = "agrupamento_user_class")
+@Entity(name = "agrupamento_usuario_class")
+@Table(name = "agrupamento_usuario_class")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AgrupamentoUserClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

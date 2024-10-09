@@ -21,6 +21,8 @@ public class ClassesController {
     @Autowired
     ClassesService classesService;
 
+    // TODO Adicionar colunas de datas de criacao e exclusao
+
     @PostMapping("/createClass")
     public ResponseEntity<Class> createNewClass(@RequestBody ClassRegisterDTO classRegisterDTO){
         try{
@@ -33,14 +35,20 @@ public class ClassesController {
 
     @PostMapping("/linkClass")
     public ResponseEntity<AgrupamentoUserClass> linkUserToClass(@RequestParam Long userId, @RequestParam String classCode){
-        AgrupamentoUserClass newAgrupamento = classesService.linkUserToClass(userId, classCode);
-        return ResponseEntity.ok(newAgrupamento);
+
+        try{
+            AgrupamentoUserClass newAgrupamento = classesService.linkUserToClass(userId, classCode);
+            return ResponseEntity.ok(newAgrupamento);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Falhou");
+        }
+
     }
 
     @GetMapping("/getClasses")
     public ResponseEntity<List<ClassesInfoDTO>> getAllClassesFromUser(@RequestParam Long userId){
         List<ClassesInfoDTO> classesInfos = classesService.getClassesFromUser(userId);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(classesInfos);
     }
 
 

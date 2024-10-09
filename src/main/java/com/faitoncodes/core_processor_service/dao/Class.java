@@ -1,15 +1,15 @@
 package com.faitoncodes.core_processor_service.dao;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity(name = "class")
 @Table(name = "class")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Class {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +27,5 @@ public class Class {
 
     @Column(name = "teacher_id", nullable = false, unique = true)
     private Long teacherId;
+
 }

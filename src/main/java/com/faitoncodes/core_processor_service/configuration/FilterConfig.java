@@ -20,6 +20,7 @@ public class FilterConfig {
 
 
         registrationBean.setFilter(new JWTFilter(secretKey));
+
         registrationBean.addUrlPatterns("/*");
 
         return registrationBean;

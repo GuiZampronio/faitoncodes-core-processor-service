@@ -27,6 +27,12 @@ public class JWTFilter implements Filter {
 
         final String authorizationHeader = httpRequest.getHeader("Authorization");
 
+        String path = ((HttpServletRequest) request).getRequestURI();
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token ausente ou mal formatado");
             return;

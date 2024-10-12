@@ -23,4 +23,11 @@ public class UserRepository {
         query.setParameter("userId", userId);
         return (String) query.getSingleResult();
     }
+
+    public Integer getTipoUsuario(Long userId){
+        String sql = "SELECT u.tipo_usuario from public.usuario u where u.user_id = :userId";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("userId", userId);
+        return (Integer) query.getSingleResult();
+    }
 }

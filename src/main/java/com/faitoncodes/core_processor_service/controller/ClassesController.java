@@ -23,8 +23,6 @@ public class ClassesController {
     @Autowired
     ClassesService classesService;
 
-    // TODO Adicionar colunas de datas de criacao e exclusao
-
     @PostMapping("/createClass")
     public ResponseEntity<Class> createNewClass(@RequestBody ClassRegisterDTO classRegisterDTO){
         try{

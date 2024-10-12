@@ -36,7 +36,10 @@ public class ClassesService {
 
 
     public Class createClass(ClassRegisterDTO classRegisterDTO) {
-        // TODO verificar se user é professor
+        if(userRepository.getTipoUsuario(classRegisterDTO.getTeacher_id()) != 1){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID de usuario informado não é um professor.");
+        }
+
         String uniqueClassID = uniqueIDGenerate(System.currentTimeMillis());
 
         while (classRepository.existsByClassCode(uniqueClassID)) {
@@ -52,9 +55,15 @@ public class ClassesService {
                 .teacherId(classRegisterDTO.getTeacher_id())
                 .build();
 
-        // TODO Adicionar o professor na tabela de agrupamento tambem
-        classRepository.save(newClass);
-        return newClass;
+        Class newClassEntity = classRepository.save(newClass);
+
+        AgrupamentoUserClass newAgrupamento = AgrupamentoUserClass.builder()
+                .userId(classRegisterDTO.getTeacher_id())
+                .classId(newClassEntity.getClassId())
+                .build();
+
+        agrupamentoRepository.save(newAgrupamento);
+        return newClassEntity;
     }
 
     private String uniqueIDGenerate(final long base10){

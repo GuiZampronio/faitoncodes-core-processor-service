@@ -3,6 +3,8 @@ package com.faitoncodes.core_processor_service.dao;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "class")
 @Table(name = "class")
 @Getter
@@ -27,5 +29,12 @@ public class Class {
 
     @Column(name = "teacher_id", nullable = false, unique = true)
     private Long teacherId;
+
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "deleted_at", nullable = true)
+    private LocalDateTime deletedAt;
 
 }

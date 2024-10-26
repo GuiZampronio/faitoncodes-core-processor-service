@@ -2,6 +2,7 @@ package com.faitoncodes.core_processor_service.dao;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -30,11 +31,10 @@ public class Class {
     @Column(name = "teacher_id", nullable = false, unique = true)
     private Long teacherId;
 
-
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "deleted_at", nullable = true)
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
 }

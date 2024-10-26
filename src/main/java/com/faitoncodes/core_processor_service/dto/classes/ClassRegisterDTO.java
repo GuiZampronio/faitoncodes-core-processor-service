@@ -8,5 +8,5 @@ public class ClassRegisterDTO {
 
     private String announcement;
 
-    private Long teacher_id;
+    private Long teacherId;
 }

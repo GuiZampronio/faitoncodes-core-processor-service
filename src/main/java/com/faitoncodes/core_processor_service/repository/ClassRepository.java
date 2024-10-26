@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface ClassRepository extends CrudRepository<Class, Long> {
     boolean existsByClassCode(String classCode);
 
+    boolean existsByTeacherId(Long teacherId);
+
     Optional<Class> findByClassCode(String classCode);
 }

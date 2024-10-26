@@ -8,6 +8,8 @@ import com.faitoncodes.core_processor_service.repository.AgrupamentoUserClassRep
 import com.faitoncodes.core_processor_service.repository.ClassRepository;
 import com.faitoncodes.core_processor_service.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.Conditions;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class ClassesService {
 
 
     public Class createClass(ClassRegisterDTO classRegisterDTO) {
-        if(userRepository.getTipoUsuario(classRegisterDTO.getTeacher_id()) != 1){
+        if(userRepository.getTipoUsuario(classRegisterDTO.getTeacherId()) != 1){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID de usuario informado não é um professor.");
         }
 
@@ -52,13 +54,13 @@ public class ClassesService {
                 .className(classRegisterDTO.getClassName())
                 .announcement(classRegisterDTO.getAnnouncement() != null ? classRegisterDTO.getAnnouncement() : null)
                 .classCode(uniqueClassID)
-                .teacherId(classRegisterDTO.getTeacher_id())
+                .teacherId(classRegisterDTO.getTeacherId())
                 .build();
 
         Class newClassEntity = classRepository.save(newClass);
 
         AgrupamentoUserClass newAgrupamento = AgrupamentoUserClass.builder()
-                .userId(classRegisterDTO.getTeacher_id())
+                .userId(classRegisterDTO.getTeacherId())
                 .classId(newClassEntity.getClassId())
                 .build();
 
@@ -131,5 +133,21 @@ public class ClassesService {
         });
 
         return listClassesInfo;
+    }
+
+    public Class updateClass(Long classId, ClassRegisterDTO classRegisterDTO) {
+        log.info("Atualizando classe...");
+        Optional<Class> actualClass = classRepository.findById(classId);
+
+        if(actualClass.isPresent()){
+            ModelMapper modelMapper = new ModelMapper();
+            Class updatedClass = actualClass.get();
+            modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+            modelMapper.map(classRegisterDTO, updatedClass);
+            return classRepository.save(updatedClass);
+        }
+
+        log.info("Classe não encontrada para atualizar");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Classe não encontrada.");
     }
 }

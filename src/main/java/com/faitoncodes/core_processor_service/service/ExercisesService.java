@@ -8,11 +8,13 @@ import com.faitoncodes.core_processor_service.dto.exercises.ExerciseInfoDTO;
 import com.faitoncodes.core_processor_service.repository.ClassRepository;
 import com.faitoncodes.core_processor_service.repository.ExerciseRepository;
 import com.faitoncodes.core_processor_service.repository.TestCaseRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Response;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,12 @@ public class ExercisesService {
 
     @Autowired
     TestCaseRepository testCaseRepository;
+
+    PropertyMap<ExerciseDTO, Exercise> customMappingExerciseDTO = new PropertyMap<ExerciseDTO, Exercise>() {
+        protected void configure() {
+            skip(destination.getId());
+        }
+    };
 
     public Exercise createExercise(ExerciseDTO exerciseDTO) {
         if(!classRepository.existsById(exerciseDTO.getClassId())){
@@ -105,7 +113,6 @@ public class ExercisesService {
             return List.of();
         }
 
-        // TODO Validar se tiver algo de errado com a string, pensar o que deve ser feito nesse caso, parar todo o processamento ou somente ignorar o que estiver errado.
         List<String> testCaseStringList = Arrays.asList(testCasesString.split("/"));
         List<TestCase> listTestCases = new ArrayList<>();
         testCaseStringList.forEach(testCase -> {
@@ -122,7 +129,7 @@ public class ExercisesService {
 
     }
 
-
+    @Transactional
     public Exercise updateExercise(ExerciseDTO exerciseDTO, Long exerciseId) {
         if(exerciseId == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID do exercício não informado");
@@ -142,19 +149,25 @@ public class ExercisesService {
 
         ModelMapper modelMapper = new ModelMapper();
         Exercise updatedExercise = actualExercise.get();
+        updatedExercise.setUpdatedDate(LocalDateTime.now());
         if(exerciseDTO.getDueDate() != null){
             ZonedDateTime dueTimeExercise = LocalDateTime.parse(exerciseDTO.getDueDate(), dataFormatter).atZone(ZoneOffset.UTC);
             updatedExercise.setDueDate(dueTimeExercise);
         }
+
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+        modelMapper.addMappings(customMappingExerciseDTO);
         modelMapper.map(exerciseDTO, updatedExercise);
 
         try{
             updatedExercise = exerciseRepository.save(updatedExercise);
-            testCaseRepository.deleteAllTestCasesFromExercise(exerciseId);
+
+
+            if(testCaseRepository.existsByExerciseId(exerciseId)){
+                testCaseRepository.deleteByExerciseId(exerciseId);
+            }
 
             List<TestCase> extractedTestCases = extractListOfTestCases(exerciseDTO.getTestCases() != null? exerciseDTO.getTestCases() : "", updatedExercise.getId());
-
 
             if(!extractedTestCases.isEmpty()){
                 extractedTestCases.forEach(testCase -> {
